@@ -67,7 +67,7 @@ bool TaskManager::isValidDate(const std::string& date) {
     return (day >= 1 && day <= 31) && (month >= 1 && month <= 12) && (year >= 0);
 }
 
-std::string TaskManager::getValidDate() {
+/*std::string TaskManager::getValidDate() {
     std::string dueDate;
     auto now = std::chrono::system_clock::now();
     std::time_t today_time = std::chrono::system_clock::to_time_t(now);
@@ -83,6 +83,46 @@ std::string TaskManager::getValidDate() {
             int year = std::stoi(dueDate.substr(6, 4));
 
             localtime_s(&today_tm, &today_time);
+            if (year < today_tm.tm_year + 1900 || (year == today_tm.tm_year + 1900 && month < today_tm.tm_mon + 1) ||
+                (year == today_tm.tm_year + 1900 && month == today_tm.tm_mon + 1 && day < today_tm.tm_mday)) {
+                std::cout << "Due date cannot be in the past. Please enter a future date.\n";
+                continue;
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            std::cout << "Invalid due date format. Please enter a valid date.\n";
+        }
+
+        // Clear input buffer
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+
+    return dueDate;
+}*/
+std::string TaskManager::getValidDate() {
+    std::string dueDate;
+    auto now = std::chrono::system_clock::now();
+    std::time_t today_time = std::chrono::system_clock::to_time_t(now);
+    struct tm today_tm;
+
+    while (true) {
+        std::cout << "Enter due date (format: DD/MM/YYYY): ";
+        std::cin >> dueDate;
+
+        if (isValidDate(dueDate)) {
+            int day = std::stoi(dueDate.substr(0, 2));
+            int month = std::stoi(dueDate.substr(3, 2));
+            int year = std::stoi(dueDate.substr(6, 4));
+            #if defined(_WIN32) || defined(_WIN64)
+            localtime_s(&today_tm, &today_time); // Windows
+            #else
+            localtime_r(&today_time, &today_tm); // macOS/Linux
+            #endif
+
             if (year < today_tm.tm_year + 1900 || (year == today_tm.tm_year + 1900 && month < today_tm.tm_mon + 1) ||
                 (year == today_tm.tm_year + 1900 && month == today_tm.tm_mon + 1 && day < today_tm.tm_mday)) {
                 std::cout << "Due date cannot be in the past. Please enter a future date.\n";
